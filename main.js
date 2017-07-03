@@ -11,26 +11,11 @@ var messageEmitter = new events.EventEmitter();
 messageEmitter.setMaxListeners(0)
 
 var messageBuffer = {
-    waiters: [],
     messageEmitter: messageEmitter
 };
 
 messageBuffer.newMessage = function(messages){
-    // for(var j = 0, length2 = this.waiters.length; j < length2; j++){
-    //     this.waiters[j].promise.set(messages);
-    // }
     this.messageEmitter.emit('newMessage', messages);
-}
-
-messageBuffer.newWaiter = function(client){
-    this.waiters.push(client);
-}
-
-function makeClient(id, promise){
-    return {
-        id: id,
-        promise: promise
-    }
 }
 
 var app = express();
@@ -64,8 +49,6 @@ app.post('/a/message/updates', function(req, res){
             resolve(data);
         });
     });
-    var client = makeClient(uuidv4(), p);
-    messageBuffer.newWaiter(client);
     p.then(function(data){
         res.set('Content-Type', 'application/json');
         res.json({'messages': data});
